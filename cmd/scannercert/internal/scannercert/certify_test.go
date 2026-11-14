@@ -124,8 +124,10 @@ func TestCertifyFindsNothingInAScannerThatSerializesItsWholeState(t *testing.T) 
 	if !report.Parses.Transparent || report.Parses.Sources != 3 {
 		t.Fatalf("parses = %+v, want 3 sources parsed identically with and without the recorder", report.Parses)
 	}
-	if report.Parses.SampleHasError || report.Parses.ErrorTrees != 1 {
-		t.Fatalf("parses = %+v, want a clean sample and one error tree (the refused third '#')", report.Parses)
+	// hashScanner does not skip whitespace, so a '#' after a space is never
+	// lexed and "1 # 2 # 3" is an error tree.
+	if report.Parses.SampleHasError || report.Parses.ErrorTrees != 2 {
+		t.Fatalf("parses = %+v, want a clean sample and two error trees (the refused third '#' and the '#' after a space)", report.Parses)
 	}
 	if report.Language != "mini" || report.Scanner != "scannercert.hashScanner" || report.Schema != Schema {
 		t.Fatalf("identity = %q %q %q", report.Schema, report.Language, report.Scanner)
